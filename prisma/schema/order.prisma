@@ -4,7 +4,7 @@ model Order {
     updatedAt DateTime  @updatedAt @map("updated_at")
     deletedAt DateTime? @map("deleted_at")
 
-    userId         String @map("user_id")
+    userId         String @map("user_id") @db.Uuid
     statusId       String @map("status_id") @db.Uuid
     description    String
     specifications String
