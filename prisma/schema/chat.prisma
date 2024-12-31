@@ -1,0 +1,62 @@
+enum ChatRoomStatus {
+    OPEN
+    CLOSED
+}
+
+model ChatRoom {
+    id        String    @id @default(uuid(7)) @db.Uuid
+    createdAt DateTime  @default(now()) @map("created_at")
+    updatedAt DateTime  @updatedAt @map("updated_at")
+    deletedAt DateTime? @map("deleted_at")
+
+    orderId     String         @unique @map("order_id") @db.Uuid
+    summary     String?
+    status      ChatRoomStatus @default(OPEN)
+    updatedById String?        @unique @map("updated_by_id") @db.Uuid
+
+    chatMessage         ChatMessage[]
+    order               Order                 @relation(fields: [orderId], references: [id])
+    updatedBy           User?                 @relation(fields: [updatedById], references: [id])
+    chatRoomParticipant ChatRoomParticipant[]
+
+    @@index([orderId], name: "idx_chat_rooms_order_id")
+    @@map("chat_rooms")
+}
+
+model ChatMessage {
+    id        String    @id @default(uuid(7)) @db.Uuid
+    createdAt DateTime  @default(now()) @map("created_at")
+    updatedAt DateTime  @updatedAt @map("updated_at")
+    deletedAt DateTime? @map("deleted_at")
+
+    chatRoomId String @map("chat_room_id") @db.Uuid
+    userId     String @map("user_id") @db.Uuid
+    message    String
+
+    chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id])
+    user     User     @relation(fields: [userId], references: [id])
+
+    @@index([chatRoomId], name: "idx_chat_messages_chat_room_id")
+    @@index([userId], name: "idx_chat_messages_user_id")
+    @@index([chatRoomId, userId], name: "idx_chat_messages_chat_room_id_user_id")
+    @@map("chat_messages")
+}
+
+model ChatRoomParticipant {
+    id        String    @id @default(uuid(7)) @db.Uuid
+    createdAt DateTime  @default(now()) @map("created_at")
+    updatedAt DateTime  @updatedAt @map("updated_at")
+    deletedAt DateTime? @map("deleted_at")
+
+    chatRoomId String @map("chat_room_id") @db.Uuid
+    userId     String @map("user_id") @db.Uuid
+
+    chatRoom ChatRoom @relation(fields: [chatRoomId], references: [id])
+    user     User     @relation(fields: [userId], references: [id])
+
+    @@unique([chatRoomId, userId], name: "uq_chat_room_participants_chat_room_id_user_id")
+    @@index([chatRoomId], name: "idx_chat_room_participants_chat_room_id")
+    @@index([userId], name: "idx_chat_room_participants_user_id")
+    @@index([chatRoomId, userId], name: "idx_chat_room_participants_chat_room_id_user_id")
+    @@map("chat_room_participants")
+}

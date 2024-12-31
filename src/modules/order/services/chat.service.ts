@@ -1,0 +1,106 @@
+import { ROLE } from '@/lib/constants/roles';
+import { IPageable } from '@/lib/interfaces/pagination';
+import { PrismaService } from '@/prisma/prisma.service';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+import { ChatRoomStatus } from '@prisma/client';
+import { OrderService } from './order.service';
+
+@Injectable()
+export class ChatService {
+  constructor(
+    private readonly db: PrismaService,
+    private readonly orderService: OrderService,
+  ) {}
+
+  async getChatsByChatRoomId(
+    userId: string,
+    chatRoomId: string,
+    pageable: IPageable,
+  ) {
+    this.checkIfUserIsPartOfChatRoom(userId, chatRoomId);
+
+    const { page, limit } = pageable;
+
+    const totalItems = await this.db.chatMessage.count({
+      where: { chatRoomId },
+    });
+    const totalPages = Math.ceil(totalItems / +limit);
+    const currentPage = Math.min(+page, totalPages);
+
+    return await this.db.chatMessage.findMany({
+      where: { chatRoomId },
+      skip: (currentPage - 1) * +limit,
+      take: +limit,
+      orderBy: { createdAt: 'asc' },
+      select: {
+        id: true,
+        message: true,
+        createdAt: true,
+        user: {
+          select: { id: true, email: true, firstName: true, lastName: true },
+        },
+      },
+    });
+  }
+
+  async createChatMessage(userId: string, chatRoomId: string, message: string) {
+    this.checkIfUserIsPartOfChatRoom(userId, chatRoomId);
+    this.checkIfChatRoomIsOpen(chatRoomId);
+
+    await this.db.chatMessage.create({
+      data: {
+        message,
+        user: { connect: { id: userId } },
+        chatRoom: { connect: { id: chatRoomId } },
+      },
+    });
+
+    // TODO: send message to websocket
+  }
+
+  async joinChatRoom(userId: string, chatRoomId: string) {
+    if (!this.orderService.userHasRole(userId, ROLE.ADMIN)) {
+      throw new ForbiddenException('only admin can join chat room');
+    }
+
+    await this.db.chatRoomParticipant.create({
+      data: {
+        userId,
+        chatRoomId,
+      },
+    });
+  }
+
+  async checkIfUserIsPartOfChatRoom(userId: string, chatRoomId: string) {
+    const chatRoom = await this.db.chatRoom.findUnique({
+      where: { id: chatRoomId },
+    });
+
+    if (!chatRoom) {
+      throw new NotFoundException('Chat room does not exist');
+    }
+
+    const chatRoomParticipants = await this.db.chatRoomParticipant.findFirst({
+      where: { chatRoomId, userId },
+    });
+
+    if (!chatRoomParticipants) {
+      throw new ForbiddenException('User is not part of the chat room');
+    }
+  }
+
+  async checkIfChatRoomIsOpen(chatRoomId: string) {
+    const chatRoom = await this.db.chatRoom.findUnique({
+      where: { id: chatRoomId },
+    });
+
+    if (chatRoom.status !== ChatRoomStatus.OPEN) {
+      throw new BadRequestException('Chat room is closed');
+    }
+  }
+}

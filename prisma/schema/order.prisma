@@ -1,0 +1,56 @@
+model Order {
+    id        String    @id @default(uuid(7)) @db.Uuid
+    createdAt DateTime  @default(now()) @map("created_at")
+    updatedAt DateTime  @updatedAt @map("updated_at")
+    deletedAt DateTime? @map("deleted_at")
+
+    userId         String @map("user_id")
+    statusId       String @map("status_id") @db.Uuid
+    description    String
+    specifications String
+    quantity       Int
+
+    status             OrderStatus          @relation(fields: [statusId], references: [id])
+    user               User                 @relation(fields: [userId], references: [id])
+    orderStatusHistory OrderStatusHistory[]
+    chatRoom           ChatRoom?
+
+    @@index([userId], name: "idx_orders_user_id")
+    @@index([statusId], name: "idx_orders_status_id")
+    @@index([userId, statusId], name: "idx_orders_user_id_status_id")
+    @@map("orders")
+}
+
+model OrderStatus {
+    id        String    @id @default(uuid(7)) @db.Uuid
+    createdAt DateTime  @default(now()) @map("created_at")
+    updatedAt DateTime  @updatedAt @map("updated_at")
+    deletedAt DateTime? @map("deleted_at")
+
+    name String @unique
+
+    order              Order[]
+    orderStatusHistory OrderStatusHistory[]
+
+    @@index([name], name: "idx_order_statuses_name")
+    @@map("order_statuses")
+}
+
+model OrderStatusHistory {
+    id        String    @id @default(uuid(7)) @db.Uuid
+    createdAt DateTime  @default(now()) @map("created_at")
+    updatedAt DateTime  @updatedAt @map("updated_at")
+    deletedAt DateTime? @map("deleted_at")
+
+    orderId     String  @map("order_id") @db.Uuid
+    createdById String  @map("created_by_id") @db.Uuid
+    statusId    String  @map("status_id") @db.Uuid
+    comment     String?
+
+    order     Order       @relation(fields: [orderId], references: [id])
+    createdBy User        @relation(fields: [createdById], references: [id])
+    status    OrderStatus @relation(fields: [statusId], references: [id])
+
+    @@index([orderId], name: "idx_order_status_histories_order_id")
+    @@map("order_status_histories")
+}

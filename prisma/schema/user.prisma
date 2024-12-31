@@ -1,0 +1,54 @@
+model User {
+    id        String    @id @default(uuid(7)) @db.Uuid
+    createdAt DateTime  @default(now()) @map("created_at")
+    updatedAt DateTime  @updatedAt @map("updated_at")
+    deletedAt DateTime? @map("deleted_at")
+
+    firstName       String  @map("first_name")
+    lastName        String  @map("last_name")
+    email           String
+    password        String
+    isEmailVerified Boolean @default(false) @db.Boolean
+
+    userRole            UserRole[]
+    order               Order[]
+    orderStatusHistory  OrderStatusHistory[]
+    chatMessage         ChatMessage[]
+    chatRoom            ChatRoom?
+    chatRoomParticipant ChatRoomParticipant[]
+
+    @@index([email], name: "idx_users_email")
+    @@map("users")
+}
+
+model Role {
+    id        String    @id @default(uuid(7)) @db.Uuid
+    createdAt DateTime  @default(now()) @map("created_at")
+    updatedAt DateTime  @updatedAt @map("updated_at")
+    deletedAt DateTime? @map("deleted_at")
+
+    name String @unique
+
+    userRole UserRole[]
+
+    @@index([name], name: "idx_roles_name")
+    @@map("roles")
+}
+
+model UserRole {
+    id        String    @id @default(uuid(7)) @db.Uuid
+    createdAt DateTime  @default(now()) @map("created_at")
+    updatedAt DateTime  @updatedAt @map("updated_at")
+    deletedAt DateTime? @map("deleted_at")
+
+    userId String
+    roleId String
+
+    user User @relation(fields: [userId], references: [id])
+    role Role @relation(fields: [roleId], references: [id])
+
+    @@unique([userId, roleId], name: "uq_user_roles_user_id_role_id")
+    @@index([userId, roleId], name: "idx_user_roles_user_id_role_id")
+    @@index([userId], name: "idx_user_roles_user_id")
+    @@map("user_roles")
+}
