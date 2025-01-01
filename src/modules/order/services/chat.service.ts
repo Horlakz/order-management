@@ -64,7 +64,7 @@ export class ChatService {
   }
 
   async joinChatRoom(userId: string, chatRoomId: string) {
-    if (!this.orderService.userHasRole(userId, ROLE.ADMIN)) {
+    if (!(await this.orderService.userHasRole(userId, ROLE.ADMIN))) {
       throw new ForbiddenException('only admin can join chat room');
     }
 

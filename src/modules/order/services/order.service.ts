@@ -57,7 +57,7 @@ export class OrderService {
 
     let where = {};
 
-    if (this.userHasRole(userId, ROLE.USER)) {
+    if (await this.userHasRole(userId, ROLE.USER)) {
       where = { userId: userId };
     }
 
@@ -109,7 +109,7 @@ export class OrderService {
   }
 
   async processOrder(userId: string, data: IOrderProcess) {
-    if (!this.userHasRole(userId, ROLE.ADMIN)) {
+    if (!(await this.userHasRole(userId, ROLE.ADMIN))) {
       throw new ForbiddenException('Only admin can process order');
     }
 
@@ -128,7 +128,7 @@ export class OrderService {
   }
 
   async completeOrder(userId: string, orderId: string) {
-    if (!this.userHasRole(userId, ROLE.ADMIN)) {
+    if (!(await this.userHasRole(userId, ROLE.ADMIN))) {
       throw new ForbiddenException('Only admin can complete order');
     }
 
@@ -181,7 +181,7 @@ export class OrderService {
   }
 
   async userHasRole(userId: string, roleName: string) {
-    const user = this.db.userRole.findFirst({
+    const user = await this.db.userRole.findFirst({
       where: { userId, role: { name: roleName } },
     });
 
