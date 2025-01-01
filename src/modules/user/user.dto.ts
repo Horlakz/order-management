@@ -39,8 +39,8 @@ export class VerifyEmailDto implements IVerifyEmail {
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(4)
-  @MaxLength(4)
+  @MinLength(6)
+  @MaxLength(6)
   code: string;
 }
 
