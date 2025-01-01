@@ -127,6 +127,19 @@ describe('ChatService', () => {
           user: { connect: { id: userId } },
           chatRoom: { connect: { id: chatRoomId } },
         },
+        select: {
+          createdAt: true,
+          id: true,
+          message: true,
+          user: {
+            select: {
+              email: true,
+              firstName: true,
+              id: true,
+              lastName: true,
+            },
+          },
+        },
       });
     });
   });

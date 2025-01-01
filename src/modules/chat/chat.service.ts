@@ -54,15 +54,21 @@ export class ChatService {
     this.checkIfUserIsPartOfChatRoom(userId, chatRoomId);
     this.checkIfChatRoomIsOpen(chatRoomId);
 
-    await this.db.chatMessage.create({
+    return await this.db.chatMessage.create({
       data: {
         message,
         user: { connect: { id: userId } },
         chatRoom: { connect: { id: chatRoomId } },
       },
+      select: {
+        id: true,
+        message: true,
+        createdAt: true,
+        user: {
+          select: { id: true, email: true, firstName: true, lastName: true },
+        },
+      },
     });
-
-    // TODO: send message to websocket
   }
 
   async joinChatRoom(userId: string, chatRoomId: string) {
