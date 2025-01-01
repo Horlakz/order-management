@@ -83,7 +83,14 @@ describe('ChatService', () => {
         pageable,
       );
 
-      expect(result).toEqual(chatMessages);
+      expect(result).toEqual({
+        data: chatMessages,
+        pagination: {
+          currentPage: 1,
+          totalItems: 1,
+          totalPages: 1,
+        },
+      });
       expect(prismaService.chatMessage.count).toHaveBeenCalledWith({
         where: { chatRoomId },
       });
@@ -183,12 +190,10 @@ describe('ChatService', () => {
       const userId = 'user1';
       const chatRoomId = 'chatRoom1';
 
-      jest
-        .spyOn(prismaService.chatRoom, 'findUnique')
-        .mockResolvedValueOnce({
-          id: chatRoomId,
-          status: ChatRoomStatus.OPEN,
-        } as any);
+      jest.spyOn(prismaService.chatRoom, 'findUnique').mockResolvedValueOnce({
+        id: chatRoomId,
+        status: ChatRoomStatus.OPEN,
+      } as any);
       jest
         .spyOn(prismaService.chatRoomParticipant, 'findFirst')
         .mockResolvedValueOnce(null);

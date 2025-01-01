@@ -1,5 +1,5 @@
 import { ROLE } from '@/lib/constants/roles';
-import { IPageable } from '@/lib/interfaces/pagination';
+import { IPageable, IPagination } from '@/lib/interfaces/pagination';
 import { PrismaService } from '@/prisma/prisma.service';
 import {
   BadRequestException,
@@ -32,7 +32,7 @@ export class ChatService {
     const totalPages = Math.ceil(totalItems / +limit);
     const currentPage = Math.min(+page, totalPages);
 
-    return await this.db.chatMessage.findMany({
+    const data = await this.db.chatMessage.findMany({
       where: { chatRoomId },
       skip: (currentPage - 1) * +limit,
       take: +limit,
@@ -46,6 +46,11 @@ export class ChatService {
         },
       },
     });
+
+    return {
+      data,
+      pagination: { currentPage, totalItems, totalPages } satisfies IPagination,
+    };
   }
 
   async createChatMessage(userId: string, chatRoomId: string, message: string) {
