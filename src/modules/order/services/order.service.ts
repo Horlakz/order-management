@@ -156,7 +156,7 @@ export class OrderService {
 
     if (newStatusIndex <= currentStatusIndex) {
       throw new BadRequestException(
-        'Invalid status update. Cannot jump stages or go back.',
+        'Order is already ' + currentStatus.toLowerCase(),
       );
     }
 
