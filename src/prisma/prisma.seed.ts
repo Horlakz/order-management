@@ -15,12 +15,13 @@ async function seedAdmin() {
   });
 
   await prisma.user.upsert({
-    where: { id: userAdmin.id },
+    where: { id: userAdmin?.id ?? '00000000-0000-0000-0000-000000000000' },
     update: { password: passwordHashed },
     create: {
       firstName: 'Admin',
       lastName: 'Checkit',
       email,
+      isEmailVerified: true,
       password: passwordHashed,
     },
   });
