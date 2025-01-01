@@ -16,6 +16,7 @@ import { AuthGuard } from './modules/user/guards/auth.guard';
 import { RoleGuard } from './modules/user/guards/role.guard';
 import { UserModule } from './modules/user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
+import { ChatModule } from './modules/chat/chat.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { PrismaModule } from './prisma/prisma.module';
     PrismaModule,
     UserModule,
     OrderModule,
+    ChatModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

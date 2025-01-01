@@ -13,7 +13,7 @@ import {
   IOrderProcess,
   IOrderStatusHistoryCreate,
   IOrderStatusUpdate,
-} from '../order.interface';
+} from './order.interface';
 
 @Injectable()
 export class OrderService {

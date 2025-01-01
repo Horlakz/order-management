@@ -7,13 +7,12 @@ import {
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { ChatRoomStatus } from '@prisma/client';
+
 import { ChatService } from './chat.service';
-import { OrderService } from './order.service';
 
 describe('ChatService', () => {
   let chatService: ChatService;
   let prismaService: PrismaService;
-  let orderService: OrderService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -36,18 +35,11 @@ describe('ChatService', () => {
             },
           },
         },
-        {
-          provide: OrderService,
-          useValue: {
-            userHasRole: jest.fn(),
-          },
-        },
       ],
     }).compile();
 
     chatService = module.get<ChatService>(ChatService);
     prismaService = module.get<PrismaService>(PrismaService);
-    orderService = module.get<OrderService>(OrderService);
   });
 
   describe('getChatsByChatRoomId', () => {
@@ -144,14 +136,14 @@ describe('ChatService', () => {
       const userId = 'admin1';
       const chatRoomId = 'chatRoom1';
 
-      jest.spyOn(orderService, 'userHasRole').mockResolvedValueOnce(true);
+      jest.spyOn(chatService, 'userHasRole').mockResolvedValueOnce(true);
       jest
         .spyOn(prismaService.chatRoomParticipant, 'create')
         .mockResolvedValueOnce(undefined);
 
       await chatService.joinChatRoom(userId, chatRoomId);
 
-      expect(orderService.userHasRole).toHaveBeenCalledWith(userId, ROLE.ADMIN);
+      expect(chatService.userHasRole).toHaveBeenCalledWith(userId, ROLE.ADMIN);
       expect(prismaService.chatRoomParticipant.create).toHaveBeenCalledWith({
         data: {
           userId,
@@ -164,7 +156,7 @@ describe('ChatService', () => {
       const userId = 'user1';
       const chatRoomId = 'chatRoom1';
 
-      jest.spyOn(orderService, 'userHasRole').mockResolvedValueOnce(false);
+      jest.spyOn(chatService, 'userHasRole').mockResolvedValueOnce(false);
 
       await expect(
         chatService.joinChatRoom(userId, chatRoomId),

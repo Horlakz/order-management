@@ -1,6 +1,3 @@
-import { User } from '@/lib/decorators/user';
-import { PageableDto } from '@/lib/dto/dto';
-import { BasePaginatedResponse, BaseResponse } from '@/lib/payload/response';
 import {
   Body,
   Controller,
@@ -11,7 +8,11 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { ChatService } from '../services/chat.service';
+
+import { User } from '@/lib/decorators/user';
+import { PageableDto } from '@/lib/dto/dto';
+import { BasePaginatedResponse, BaseResponse } from '@/lib/payload/response';
+import { ChatService } from './chat.service';
 
 @Controller('chat')
 export class ChatController {
@@ -50,7 +51,7 @@ export class ChatController {
     );
   }
 
-  @Post(':chatroomId')
+  @Post(':chatroomId/join')
   async joinChatRoom(
     @User('id') userId: string,
     @Param('chatroomId', ParseUUIDPipe) chatRoomId: string,

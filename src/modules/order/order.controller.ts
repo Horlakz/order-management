@@ -13,8 +13,8 @@ import { IsRole } from '@/lib/decorators/role';
 import { User } from '@/lib/decorators/user';
 import { PageableDto } from '@/lib/dto/dto';
 import { BasePaginatedResponse, BaseResponse } from '@/lib/payload/response';
-import { OrderCreateDto, OrderPageableDto } from '../order.dto';
-import { OrderService } from '../services/order.service';
+import { OrderCreateDto, OrderPageableDto } from './order.dto';
+import { OrderService } from './order.service';
 
 @Controller('order')
 export class OrderController {

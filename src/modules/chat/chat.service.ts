@@ -1,6 +1,3 @@
-import { ROLE } from '@/lib/constants/roles';
-import { IPageable, IPagination } from '@/lib/interfaces/pagination';
-import { PrismaService } from '@/prisma/prisma.service';
 import {
   BadRequestException,
   ForbiddenException,
@@ -8,14 +5,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { ChatRoomStatus } from '@prisma/client';
-import { OrderService } from './order.service';
+
+import { ROLE } from '@/lib/constants/roles';
+import { IPageable, IPagination } from '@/lib/interfaces/pagination';
+import { PrismaService } from '@/prisma/prisma.service';
 
 @Injectable()
 export class ChatService {
-  constructor(
-    private readonly db: PrismaService,
-    private readonly orderService: OrderService,
-  ) {}
+  constructor(private readonly db: PrismaService) {}
 
   async getChatsByChatRoomId(
     userId: string,
@@ -69,7 +66,7 @@ export class ChatService {
   }
 
   async joinChatRoom(userId: string, chatRoomId: string) {
-    if (!(await this.orderService.userHasRole(userId, ROLE.ADMIN))) {
+    if (!(await this.userHasRole(userId, ROLE.ADMIN))) {
       throw new ForbiddenException('only admin can join chat room');
     }
 
@@ -107,5 +104,13 @@ export class ChatService {
     if (chatRoom.status !== ChatRoomStatus.OPEN) {
       throw new BadRequestException('Chat room is closed');
     }
+  }
+
+  async userHasRole(userId: string, roleName: string) {
+    const user = await this.db.userRole.findFirst({
+      where: { userId, role: { name: roleName } },
+    });
+
+    return !!user;
   }
 }
