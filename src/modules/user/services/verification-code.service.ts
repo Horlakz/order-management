@@ -13,8 +13,7 @@ export class VerificationCodeService {
   ) {}
 
   async create(email: string): Promise<string> {
-    const user = await this.userService.findUserByEmail(email);
-    this.ensureUserExists(user);
+    const user = await this.isUserEmailvalid(email);
 
     const code = AppUtilities.generateRandomNumber(6);
     await this.cacheManager.set(this.cacheKey(user.id), code, 600000);
@@ -23,8 +22,7 @@ export class VerificationCodeService {
   }
 
   async verify(code: string, email: string): Promise<void> {
-    const user = await this.userService.findUserByEmail(email);
-    this.ensureUserExists(user);
+    const user = await this.isUserEmailvalid(email);
 
     const cachedCode = await this.cacheManager.get<string>(
       this.cacheKey(user.id),
@@ -38,10 +36,14 @@ export class VerificationCodeService {
     return `verification-code:${userId}`;
   }
 
-  private ensureUserExists(user: any): void {
+  private async isUserEmailvalid(email: string) {
+    const user = await this.userService.findUserByEmail(email);
+
     if (!user) {
       throw new BadRequestException('User not found');
     }
+
+    return user;
   }
 
   private ensureCodeIsValid(
