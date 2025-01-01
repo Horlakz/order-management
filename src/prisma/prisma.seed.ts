@@ -23,6 +23,7 @@ async function seedAdmin() {
       email,
       isEmailVerified: true,
       password: passwordHashed,
+      userRole: { create: { role: { connect: { name: ROLE.ADMIN } } } },
     },
   });
 }
@@ -48,9 +49,9 @@ async function seedOrderStatuses() {
 }
 
 async function main() {
-  await seedAdmin();
   await seedRoles();
   await seedOrderStatuses();
+  await seedAdmin();
 }
 
 main()
