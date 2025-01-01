@@ -32,10 +32,10 @@ export class EmailService {
       hbs({
         viewEngine: {
           extname: '.hbs',
-          partialsDir: './templates/',
-          layoutsDir: './templates/',
+          partialsDir: './src/modules/email/templates/',
+          layoutsDir: './src/modules/email/templates/',
         },
-        viewPath: './templates/',
+        viewPath: './src/modules/email/templates/',
         extName: '.hbs',
       }),
     );
