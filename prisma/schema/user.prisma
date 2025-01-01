@@ -8,7 +8,7 @@ model User {
     lastName        String  @map("last_name")
     email           String
     password        String
-    isEmailVerified Boolean @default(false) @db.Boolean
+    isEmailVerified Boolean @default(false) @map("is_email_verified") @db.Boolean
 
     userRole            UserRole[]
     order               Order[]
