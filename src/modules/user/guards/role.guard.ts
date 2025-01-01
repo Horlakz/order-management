@@ -9,20 +9,47 @@ import { PrismaService } from '@/prisma/prisma.service';
 @Injectable()
 export class RoleGuard implements CanActivate {
   constructor(
-    private reflector: Reflector,
-    private db: PrismaService,
+    private readonly reflector: Reflector,
+    private readonly db: PrismaService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const isPublic = this.reflector.getAllAndOverride<boolean>(ISPUBLICKEY, [
+    if (this.isPublic(context)) return true;
+
+    const userId = this.getUserId(context);
+    const requiredRole = this.getRequiredRole(context);
+
+    if (requiredRole) {
+      return this.hasUserRole(userId, requiredRole);
+    }
+
+    return true;
+  }
+
+  private isPublic(context: ExecutionContext): boolean {
+    return this.reflector.getAllAndOverride<boolean>(ISPUBLICKEY, [
       context.getHandler(),
       context.getClass(),
     ]);
+  }
 
-    if (isPublic) return true;
+  private getUserId(context: ExecutionContext): string {
+    return context.switchToHttp().getRequest().user.sub;
+  }
 
-    const userId = context.switchToHttp().getRequest().user.sub;
+  private getRequiredRole(
+    context: ExecutionContext,
+  ): keyof typeof ROLE | undefined {
+    return this.reflector.getAllAndOverride<keyof typeof ROLE>(ISADMINKEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+  }
 
+  private async hasUserRole(
+    userId: string,
+    role: keyof typeof ROLE,
+  ): Promise<boolean> {
     const userRoles = await this.db.userRole.findMany({
       where: { userId },
       select: { role: { select: { name: true } } },
@@ -30,13 +57,6 @@ export class RoleGuard implements CanActivate {
 
     if (!userRoles) return false;
 
-    const role = this.reflector.getAllAndOverride<keyof typeof ROLE>(
-      ISADMINKEY,
-      [context.getHandler(), context.getClass()],
-    );
-
-    if (role) return userRoles.some((userRole) => userRole.role.name === role);
-
-    return true;
+    return userRoles.some((userRole) => userRole.role.name === role);
   }
 }
