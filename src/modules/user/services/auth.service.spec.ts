@@ -1,11 +1,13 @@
-import { HashUtils } from '@/lib/utilities/hash.utilities';
-import { EmailService } from '@/modules/email/email.service';
 import {
   BadRequestException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+
+import { HashUtils } from '@/lib/utilities/hash.utilities';
+import { JwtUtils } from '@/lib/utilities/jwt.utilities';
+import { EmailService } from '@/modules/email/email.service';
 import { VerificationCodePurpose } from '../user.interface';
 import { AuthService } from './auth.service';
 import { UserService } from './user.service';
@@ -213,5 +215,147 @@ describe('AuthService', () => {
     });
   });
 
-  // TODO: add more tests
+  describe('verifyEmail', () => {
+    it('should throw BadRequestException if user is not found', async () => {
+      jest.spyOn(userService, 'findUserByEmail').mockResolvedValue(null);
+
+      await expect(
+        authService.verifyEmail('test@example.com', 'code'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should verify email and update user if verification is successful', async () => {
+      jest.spyOn(userService, 'findUserByEmail').mockResolvedValue({
+        id: '1',
+        email: 'test@example.com',
+        isEmailVerified: false,
+      } as any);
+      jest
+        .spyOn(verificationCodeService, 'verify')
+        .mockResolvedValue(undefined);
+      jest.spyOn(userService, 'updateUser').mockResolvedValue(undefined);
+
+      await authService.verifyEmail('test@example.com', 'code');
+
+      expect(verificationCodeService.verify).toHaveBeenCalledWith(
+        'code',
+        'test@example.com',
+      );
+      expect(userService.updateUser).toHaveBeenCalledWith('1', {
+        isEmailVerified: true,
+      });
+    });
+  });
+
+  describe('forgotPassword', () => {
+    it('should throw BadRequestException if user is not found', async () => {
+      jest.spyOn(userService, 'findUserByEmail').mockResolvedValue(null);
+
+      await expect(
+        authService.forgotPassword('test@example.com'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw UnauthorizedException if email is not verified', async () => {
+      jest.spyOn(userService, 'findUserByEmail').mockResolvedValue({
+        isEmailVerified: false,
+      } as any);
+
+      await expect(
+        authService.forgotPassword('test@example.com'),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should send verification code if email is verified', async () => {
+      jest.spyOn(userService, 'findUserByEmail').mockResolvedValue({
+        email: 'test@example.com',
+        isEmailVerified: true,
+      } as any);
+      jest
+        .spyOn(authService, 'sendVerificationCode')
+        .mockResolvedValue(undefined);
+
+      await authService.forgotPassword('test@example.com');
+
+      expect(authService.sendVerificationCode).toHaveBeenCalledWith(
+        'test@example.com',
+        VerificationCodePurpose.RESET_PASSWORD,
+      );
+    });
+  });
+
+  describe('resetPassword', () => {
+    it('should throw BadRequestException if user is not found', async () => {
+      jest.spyOn(userService, 'findUserByEmail').mockResolvedValue(null);
+
+      await expect(
+        authService.resetPassword('test@example.com', 'code', 'newPassword'),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw UnauthorizedException if email is not verified', async () => {
+      jest.spyOn(userService, 'findUserByEmail').mockResolvedValue({
+        isEmailVerified: false,
+      } as any);
+
+      await expect(
+        authService.resetPassword('test@example.com', 'code', 'newPassword'),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should reset password if verification is successful', async () => {
+      jest.spyOn(userService, 'findUserByEmail').mockResolvedValue({
+        id: '1',
+        email: 'test@example.com',
+        isEmailVerified: true,
+      } as any);
+      jest
+        .spyOn(verificationCodeService, 'verify')
+        .mockResolvedValue(undefined);
+      jest.spyOn(HashUtils, 'hash').mockResolvedValue('hashedPassword');
+      jest.spyOn(userService, 'updateUser').mockResolvedValue(undefined);
+
+      await authService.resetPassword(
+        'test@example.com',
+        'code',
+        'newPassword',
+      );
+
+      expect(verificationCodeService.verify).toHaveBeenCalledWith(
+        'code',
+        'test@example.com',
+      );
+      expect(HashUtils.hash).toHaveBeenCalledWith('newPassword');
+      expect(userService.updateUser).toHaveBeenCalledWith('1', {
+        password: 'hashedPassword',
+      });
+    });
+  });
+
+  describe('refreshTokens', () => {
+    it('should return new tokens if refresh token is valid', async () => {
+      jest.spyOn(JwtUtils, 'verifyToken').mockReturnValue({ sub: 'userId' });
+      jest.spyOn(authService, 'generateTokens').mockReturnValue({
+        accessToken: 'newAccessToken',
+        refreshToken: 'newRefreshToken',
+      });
+
+      const result = authService.refreshTokens('validRefreshToken');
+
+      expect(result).toEqual({
+        accessToken: 'newAccessToken',
+        refreshToken: 'newRefreshToken',
+      });
+    });
+
+    it('should throw error if refresh token is invalid', async () => {
+      jest.spyOn(JwtUtils, 'verifyToken').mockImplementation(() => {
+        throw new Error('Invalid token');
+      });
+
+      expect(() => authService.refreshTokens('invalidRefreshToken')).toThrow(
+        'Invalid token',
+      );
+    });
+  });
 });
