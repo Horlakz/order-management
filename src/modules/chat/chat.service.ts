@@ -28,7 +28,6 @@ export class ChatService {
     });
     const totalPages = Math.ceil(totalItems / +limit);
     const currentPage = Math.max(1, Math.min(+page, totalPages));
-    console.log(page, totalItems, totalPages, limit, currentPage);
 
     const data = await this.db.chatMessage.findMany({
       where: { chatRoomId },
