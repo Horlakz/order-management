@@ -53,7 +53,7 @@ export class OrderService {
   }
 
   async getAllOrders(pageable: IPageable & { userId: string }) {
-    const { page, limit, sortBy, sortDir, userId } = pageable;
+    const { page = 1, limit = 10, sortBy, sortDir, userId } = pageable;
 
     let where = {};
 
@@ -63,7 +63,7 @@ export class OrderService {
 
     const totalItems = await this.db.order.count({ where });
     const totalPages = Math.ceil(totalItems / +limit);
-    const currentPage = Math.min(+page, totalPages);
+    const currentPage = Math.max(1, Math.min(+page, totalPages));
 
     const orders = await this.db.order.findMany({
       where,
