@@ -9,3 +9,13 @@ export const User = createParamDecorator(
     return req.user;
   },
 );
+
+export const WsUser = createParamDecorator(
+  (data: string, ctx: ExecutionContext) => {
+    const client = ctx.switchToWs().getClient();
+
+    if (data === 'id') return client.user?.sub;
+
+    return client.user;
+  },
+);

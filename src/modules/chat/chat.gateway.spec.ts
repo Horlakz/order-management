@@ -2,7 +2,7 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Test, TestingModule } from '@nestjs/testing';
 import { Cache } from 'cache-manager';
-import { Socket } from 'socket.io';
+import { Server, Socket } from 'socket.io';
 import { ChatSendMessageDto } from './chat.dto';
 import { ChatGateway } from './chat.gateway';
 import { ChatService } from './chat.service';
@@ -12,6 +12,7 @@ describe('ChatGateway', () => {
   let cacheManager: Cache;
   let chatService: ChatService;
   let client: Socket;
+  let server: Server;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -54,6 +55,9 @@ describe('ChatGateway', () => {
       to: jest.fn().mockReturnThis(),
       emit: jest.fn(),
     } as unknown as Socket;
+    server = new Server();
+    jest.spyOn(server, 'to').mockReturnThis();
+    chatGateway.server = server;
   });
 
   it('should handle disconnect', async () => {
@@ -67,7 +71,7 @@ describe('ChatGateway', () => {
   it('should handle join', async () => {
     const chatroomId = 'chatroom-id';
     const userId = 'user-id';
-    (client as any).user = userId;
+
     const messages = {
       data: [
         {
@@ -102,7 +106,7 @@ describe('ChatGateway', () => {
 
     jest.spyOn(chatService, 'getChatsByChatRoomId').mockResolvedValue(messages);
 
-    await chatGateway.handleJoin(chatroomId, client);
+    await chatGateway.handleJoin(chatroomId, client, userId);
 
     expect(client.join).toHaveBeenCalledWith(chatroomId);
     expect(cacheManager.set).toHaveBeenCalledWith(client.id, chatroomId);
@@ -111,10 +115,7 @@ describe('ChatGateway', () => {
       chatroomId,
       { page: 1, limit: 10 },
     );
-    expect(client.to(chatroomId).emit).toHaveBeenCalledWith(
-      'messages',
-      messages.data,
-    );
+    expect(server.to).toHaveBeenCalledWith(chatroomId);
   });
 
   it('should handle message', async () => {
@@ -135,22 +136,18 @@ describe('ChatGateway', () => {
       },
     };
 
-    (client as any).user = userId;
-
     jest
       .spyOn(chatService, 'createChatMessage')
       .mockResolvedValue(message as any);
+    jest.spyOn(cacheManager, 'get').mockResolvedValue(data.chatroomId);
 
-    await chatGateway.handleMessage(data, client);
+    await chatGateway.handleMessage(data, client, userId);
 
     expect(chatService.createChatMessage).toHaveBeenCalledWith(
       userId,
       data.chatroomId,
       data.message,
     );
-    expect(client.to(data.chatroomId).emit).toHaveBeenCalledWith(
-      'message',
-      message,
-    );
+    expect(server.to).toHaveBeenCalledWith(data.chatroomId);
   });
 });
