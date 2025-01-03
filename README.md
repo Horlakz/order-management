@@ -1,1 +1,0 @@
-## Checkit Assessment Tests
