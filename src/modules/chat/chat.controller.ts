@@ -1,7 +1,9 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
+  HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
@@ -44,6 +46,8 @@ export class ChatController {
     @Param('chatroomId', ParseUUIDPipe) chatRoomId: string,
     @Body('message') message: string,
   ) {
+    if (message === '') throw new BadRequestException('Message is required');
+
     return new BaseResponse(
       HttpStatus.CREATED,
       'Message sent successfully',
@@ -51,6 +55,7 @@ export class ChatController {
     );
   }
 
+  @HttpCode(HttpStatus.OK)
   @Post(':chatroomId/join')
   async joinChatRoom(
     @User('id') userId: string,

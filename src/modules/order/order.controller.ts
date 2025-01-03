@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   HttpStatus,
   Param,
   ParseUUIDPipe,
@@ -54,6 +55,7 @@ export class OrderController {
     );
   }
 
+  @HttpCode(HttpStatus.OK)
   @IsRole('ADMIN')
   @Post(':id/process')
   async processOrder(
@@ -68,6 +70,7 @@ export class OrderController {
     );
   }
 
+  @HttpCode(HttpStatus.OK)
   @IsRole('ADMIN')
   @Post(':id/complete')
   async completeOrder(
