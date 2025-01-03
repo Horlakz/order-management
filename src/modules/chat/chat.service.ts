@@ -19,7 +19,7 @@ export class ChatService {
     chatRoomId: string,
     pageable: IPageable,
   ) {
-    this.checkIfUserIsPartOfChatRoom(userId, chatRoomId);
+    await this.checkIfUserIsPartOfChatRoom(userId, chatRoomId);
 
     const { page = 1, limit = 10 } = pageable;
 
@@ -51,8 +51,8 @@ export class ChatService {
   }
 
   async createChatMessage(userId: string, chatRoomId: string, message: string) {
-    this.checkIfUserIsPartOfChatRoom(userId, chatRoomId);
-    this.checkIfChatRoomIsOpen(chatRoomId);
+    await this.checkIfUserIsPartOfChatRoom(userId, chatRoomId);
+    await this.checkIfChatRoomIsOpen(chatRoomId);
 
     return await this.db.chatMessage.create({
       data: {
