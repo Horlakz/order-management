@@ -35,8 +35,8 @@ The API documentation for this application is available in the Postman link. You
 1. Clone the repository:
 
    ```sh
-   git clone https://github.com/yourusername/checkit-order-application.git
-   cd checkit-order-application
+   git clone https://github.com/Horlakz/checkit-assessment.git
+   cd checkit-assessment
    ```
 
 2. Install dependencies:
