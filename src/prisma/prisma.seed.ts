@@ -7,7 +7,7 @@ import { HashUtils } from '../lib/utilities/hash.utilities';
 const prisma = new PrismaClient({ log: ['query'] });
 
 async function seedAdmin() {
-  const email = 'admin@checkit.com';
+  const email = 'admin@horlakz.com';
   const passwordHashed = await HashUtils.hash('password');
 
   const userAdmin = await prisma.user.findFirst({
@@ -19,7 +19,7 @@ async function seedAdmin() {
     update: { password: passwordHashed },
     create: {
       firstName: 'Admin',
-      lastName: 'Checkit',
+      lastName: 'Horlakz',
       email,
       isEmailVerified: true,
       password: passwordHashed,
@@ -29,7 +29,7 @@ async function seedAdmin() {
 }
 
 async function seedTestUser() {
-  const email = 'test@checkit.com';
+  const email = 'test@horlakz.com';
   const passwordHashed = await HashUtils.hash('password');
 
   const userTest = await prisma.user.findFirst({
@@ -41,7 +41,7 @@ async function seedTestUser() {
     update: { password: passwordHashed },
     create: {
       firstName: 'Test',
-      lastName: 'Checkit',
+      lastName: 'Horlakz',
       email,
       isEmailVerified: true,
       password: passwordHashed,

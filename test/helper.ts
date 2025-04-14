@@ -5,7 +5,7 @@ import { PrismaClient } from '@prisma/client';
 export async function getAuthToken(db: PrismaClient) {
   const testUser = await db.user.create({
     data: {
-      email: 'test@checkit.com',
+      email: 'test@horlakz.com',
       firstName: 'test',
       lastName: 'user',
       password: 'password',
@@ -14,7 +14,7 @@ export async function getAuthToken(db: PrismaClient) {
   });
   const adminUser = await db.user.create({
     data: {
-      email: 'admin@checkit.com',
+      email: 'admin@horlakz.com',
       firstName: 'admin',
       lastName: 'user',
       password: 'password',
