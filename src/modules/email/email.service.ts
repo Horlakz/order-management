@@ -43,7 +43,7 @@ export class EmailService {
 
   async sendEmail(options: MailOptions) {
     if (!options.from) {
-      options.from = `"Checkit" <${this.configService.get(env.EMAIL_FROM)}>`;
+      options.from = `"Horlakz Order App" <${this.configService.get(env.EMAIL_FROM)}>`;
     }
 
     await this.transporter.sendMail(options);
