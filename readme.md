@@ -1,6 +1,6 @@
-# Checkit Order Application
+# Order Application
 
-This repository contains the Checkit Order Application, an order management system built with NestJS. The application provides various functionalities including user authentication, order management, and chat features.
+This repository contains an order management system built with NestJS. The application provides various functionalities including user authentication, order management, and chat features.
 
 ## Table of Contents
 
@@ -35,8 +35,8 @@ The API documentation for this application is available in the Postman link. You
 1. Clone the repository:
 
    ```sh
-   git clone https://github.com/Horlakz/checkit-assessment.git
-   cd checkit-assessment
+   git clone https://github.com/Horlakz/order-management.git
+   cd order-management
    ```
 
 2. Install dependencies:
@@ -47,7 +47,7 @@ The API documentation for this application is available in the Postman link. You
 
 3. Set up environment variables:
 
-   Copy the [.env.sample](http://_vscodecontentref_/0) file to [.env](http://_vscodecontentref_/1) and update the values as needed.
+   Copy the `.env.sample` file to `.env` and update the values as needed.
 
    ```sh
    cp .env.sample .env
