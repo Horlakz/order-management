@@ -19,7 +19,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org daniel-olakotan --project checkit-test ./dist && sentry-cli sourcemaps upload --org daniel-olakotan --project checkit-test ./dist",
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org daniel-olakotan --project order-management-test ./dist && sentry-cli sourcemaps upload --org daniel-olakotan --project order-management-test ./dist",
     "prisma:seed": "prisma db seed"
   },
   "dependencies": {
